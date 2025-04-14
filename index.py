@@ -39,16 +39,16 @@ col1, col2 = st.columns(2)
 
 with col1:
     if 'ProductBrand' in df.columns and 'CustomerSatisfaction' in df.columns:
-        st.subheader("⭐ Top 5 Brand dengan Rata-Rata Kepuasan Tertinggi")
-        # Hitung rata-rata satisfaction per brand
+        st.subheader("⭐ Top 5 Brand dengan Total Kepuasan Tertinggi")
+        # Hitung Total satisfaction per brand
         top_brands = df.groupby('ProductBrand')['CustomerSatisfaction'].sum().reset_index()
         top_brands = top_brands.sort_values(by='CustomerSatisfaction', ascending=False).head(5)
         fig = px.bar(
             top_brands,
             x='ProductBrand',
             y='CustomerSatisfaction',
-            title='Top 5 Brand dengan Rata-Rata Kepuasan Pelanggan Tertinggi',
-            labels={'CustomerSatisfaction': 'Rata-Rata Kepuasan', 'ProductBrand': 'Brand'},
+            title='Top 5 Brand dengan Total Kepuasan Pelanggan Tertinggi',
+            labels={'CustomerSatisfaction': 'Total Kepuasan', 'ProductBrand': 'Brand'},
             color='CustomerSatisfaction',
             color_continuous_scale='Tealgrn'
         )
@@ -75,3 +75,26 @@ with col2:
             color_continuous_scale='YlGnBu'
         )
         st.plotly_chart(fig, use_container_width=True)
+
+if 'ProductPrice' in df.columns and 'CustomerSatisfaction' in df.columns:
+    st.subheader("📈 Scatter Plot: Harga vs Kepuasan Pelanggan")
+    fig = px.scatter(
+        df,
+        x='ProductPrice',
+        y='CustomerSatisfaction',
+        trendline='ols',  # Ordinary Least Squares Regression (garis tren)
+        labels={'ProductPrice': 'Harga Produk ($)', 'CustomerSatisfaction': 'Kepuasan Pelanggan (1–5)'},
+        title='Hubungan Antara Harga Produk dan Tingkat Kepuasan Pelanggan',
+        color='ProductCategory'
+    )
+    fig.update_layout(xaxis_title="Harga Produk ($)", yaxis_title="Kepuasan Pelanggan (1–5)")
+    st.plotly_chart(fig, use_container_width=True)
+    # Korelasi (opsional)
+    correlation = df['ProductPrice'].corr(df['CustomerSatisfaction'])
+    st.markdown(f"📊 **Korelasi antara harga dan kepuasan pelanggan:** `{correlation:.3f}`")
+    if correlation > 0.2:
+        st.success("Semakin mahal harga, cenderung semakin puas.")
+    elif correlation < -0.2:
+        st.warning("Semakin mahal harga, justru pelanggan cenderung kurang puas.")
+    else:
+        st.info("Hubungan antara harga dan kepuasan pelanggan lemah atau tidak signifikan.")
