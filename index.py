@@ -76,25 +76,25 @@ with col2:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-if 'ProductPrice' in df.columns and 'CustomerSatisfaction' in df.columns:
-    st.subheader("📈 Scatter Plot: Harga vs Kepuasan Pelanggan")
-    fig = px.scatter(
-        df,
-        x='ProductPrice',
-        y='CustomerSatisfaction',
-        trendline='ols',  # Ordinary Least Squares Regression (garis tren)
-        labels={'ProductPrice': 'Harga Produk ($)', 'CustomerSatisfaction': 'Kepuasan Pelanggan (1–5)'},
-        title='Hubungan Antara Harga Produk dan Tingkat Kepuasan Pelanggan',
-        color='ProductCategory'
+if 'CustomerAge' in df.columns and 'CustomerGender' in df.columns and 'PurchaseFrequency' in df.columns:
+    st.subheader("📊 Grafik Stacked Bar: Frekuensi Pembelian Berdasarkan Usia dan Gender")
+    # Buat rentang usia
+    bins = [0, 20, 30, 40, 50, 60, 100]
+    labels = ['<21', '21-30', '31-40', '41-50', '51-60', '60+']
+    df['AgeGroup'] = pd.cut(df['CustomerAge'], bins=bins, labels=labels, right=False)
+    # Mapping gender ke label
+    df['Gender'] = df['CustomerGender'].map({0: 'Male', 1: 'Female'})
+    # Grouping data
+    grouped = df.groupby(['AgeGroup', 'Gender'])['PurchaseFrequency'].sum().reset_index()
+    # Plot stacked bar
+    fig = px.bar(
+        grouped,
+        x='AgeGroup',
+        y='PurchaseFrequency',
+        color='Gender',
+        title='Total Frekuensi Pembelian Berdasarkan Rentang Usia dan Jenis Kelamin',
+        labels={'AgeGroup': 'Rentang Usia', 'PurchaseFrequency': 'Frekuensi Pembelian'},
+        barmode='stack'
     )
-    fig.update_layout(xaxis_title="Harga Produk ($)", yaxis_title="Kepuasan Pelanggan (1–5)")
+    fig.update_layout(xaxis_title="Rentang Usia", yaxis_title="Total Frekuensi Pembelian")
     st.plotly_chart(fig, use_container_width=True)
-    # Korelasi (opsional)
-    correlation = df['ProductPrice'].corr(df['CustomerSatisfaction'])
-    st.markdown(f"📊 **Korelasi antara harga dan kepuasan pelanggan:** `{correlation:.3f}`")
-    if correlation > 0.2:
-        st.success("Semakin mahal harga, cenderung semakin puas.")
-    elif correlation < -0.2:
-        st.warning("Semakin mahal harga, justru pelanggan cenderung kurang puas.")
-    else:
-        st.info("Hubungan antara harga dan kepuasan pelanggan lemah atau tidak signifikan.")
